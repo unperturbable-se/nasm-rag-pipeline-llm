@@ -3,6 +3,7 @@ from openai import OpenAI
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
+from pathlib import Path
 embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/paraphrase-MiniLM-L3-v2")
 
 
@@ -52,11 +53,13 @@ def DocumentLoader(filePath,fileCount):
     print("Loading Document...")
     md=MarkItDown()
     result = md.convert(filePath)
+    CURRENT_DIR = Path(__file__).resolve().parent
     open(f"processed/loaded{fileCount}.md", "w").write(result.markdown)
 
 def TextSplitter():
     full_text=""
-    with open("processed/nasm_final_doc.md", "r") as f:
+    CURRENT_DIR = Path(__file__).resolve().parent
+    with open(CURRENT_DIR/"processed/nasm_final_doc.md", "r") as f:
         full_text = f.read()
     document_chunks=markdown_code_splitter.split_text(full_text)# error in this line: str object has no attribute page content
     return document_chunks
