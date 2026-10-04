@@ -1,5 +1,9 @@
 from markitdown import MarkItDown
 from openai import OpenAI
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_community.vectorstores import FAISS
+embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/paraphrase-MiniLM-L3-v2")
 
 client = OpenAI(
     api_key="redacted",
@@ -15,6 +19,32 @@ f"""You are a technical documentation formatter.
     4. make sure to emphasize important logics
 """
 )
+
+query_prompt = " "\
+    "you are an agent that parses through documentation for an assembly language documentation and gives a user answer" \
+    "the question is given and then multiple relevant information retrieved from a source database are given in the format" \
+    "Question:<>  Reference:<> answer the question if any otherwise only send out code block"\
+    "your answers must be in 64 bit unless specified and if its not a code-only prompt then you are supposed to give as much of"\
+    "a lengthy and descriptive answer as you can( but must not be too long). but your only allowed to fetch info from the docs and dont make up any info. if you cant"\
+    "find enough information to give a reliable answer then remain silent"
+
+question_improver= ""\
+    "[64 bit, memory, space, stack, heap, loop, condition]"
+
+markdown_code_splitter = RecursiveCharacterTextSplitter(
+    separators=[
+        r"\n# ",       # Split on Top headings
+        r"\n## ",      # Split on Sub headings
+        r"\n```",      # Split right at code block boundaries
+        r"\n\n",       # Split on paragraphs
+        r"\n",         # Split on lines
+        r" ",          # Split on words
+        r""            # Ultimate fallback
+    ],
+    is_separator_regex=True,
+    chunk_size=1000,
+    chunk_overlap=100
+)
 fileCount=0
 
 #--------------------+++++++++++++-------------+++++++++++------------++++++++++++----------+++++
@@ -25,28 +55,44 @@ def DocumentLoader(filePath,fileCount):
     md=MarkItDown()
     result = md.convert(filePath)
     open(f"processed/loaded{fileCount}.md", "w").write(result.markdown)
-#def DocumentCleaner(fileCount):
-#    print("Cleaning Document...")
-#    document=""
-#    document=open(f"processed/loaded{fileCount}.md", "r").read()
-#    response = client.chat.completions.create(
-#        model="gemini-3.5-flash",
-#        messages=[
-#            {"role": "system", "content": system_prompt},
-#            {"role": "user", "content": document}
-#        ],
-#        temperature=0.2
-#    )
-#    cleaned_document = response.choices[0].message.content
-#    open(f"cleaned/cleaned{fileCount}.md", "w").write(cleaned_document)
-#    pass
+
 def TextSplitter():
-    pass
+    full_text=""
+    with open("processed/nasm_final_doc.md", "r") as f:
+        full_text = f.read()
+    document_chunks=markdown_code_splitter.split_text(full_text)# error in this line: str object has no attribute page content
+    return document_chunks
 
-def Indexer():
-    pass
+def vectorizer(document_chunks):
+    vector_store = FAISS.from_texts(document_chunks, embeddings)
+    return vector_store
 
-DocumentLoader ("documents/nasmv4.html",4)
-#DocumentCleaner(2)
+def Indexer(vector_store):
+    retriever = vector_store.as_retriever(
+         search_type="similarity",
+         search_kwargs={"k": 50}
+        )
+    return retriever
+    
+
+#DocumentLoader ("documents/nasmv4.html",4)
+chunks=TextSplitter()
+vectors=vectorizer(chunks)
+retriever=Indexer(vectors)
+
+
+
+while True:
+    question=str(input("Enter the question:"))
+    reference=retriever.invoke(question+question_improver)
+    response = client.chat.completions.create(
+    model="gemini-3.5-flash",  # Or another supported model like gemini-2.5-pro
+    messages=[
+        {"role": "system", "content": query_prompt},
+        {"role": "user", "content": f"Question:<{question}>   Reference:<{reference}>"}
+    ]
+    )
+    print(response.choices[0].message.content)
+
 
     
