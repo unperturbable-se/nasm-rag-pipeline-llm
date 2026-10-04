@@ -1,3 +1,5 @@
 [submodule "markitdown"]
 	path = Backend/markitdown
 	url = git@github.com:microsoft/markitdown.git
+[submodule "Backend/markitdown"]
+	url = https://github.com/microsoft/markitdown.git
