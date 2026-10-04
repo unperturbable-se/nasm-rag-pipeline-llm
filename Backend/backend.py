@@ -1,6 +1,6 @@
 from fastapi import FastAPI,Body
 from fastapi.middleware.cors import CORSMiddleware
-from main import  get_rag_response,select_client
+from rag_maker import  get_rag_response,select_client
 app = FastAPI()
 
 app.add_middleware(
