@@ -5,10 +5,6 @@ from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/paraphrase-MiniLM-L3-v2")
 
-#client = OpenAI(
-#    api_key="",
-#    base_url="https://api.groq.com/openai/v1",
-#)
 
 llm_model="openai/gpt-oss-120b"
 
