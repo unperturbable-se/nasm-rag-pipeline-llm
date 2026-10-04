@@ -1,6 +1,6 @@
 from fastapi import FastAPI,Body
 from fastapi.middleware.cors import CORSMiddleware
-from rag_maker import  get_rag_response,select_client
+from rag_maker import  get_rag_response,select_client,start
 app = FastAPI()
 
 app.add_middleware(
@@ -19,6 +19,11 @@ def q0(question:dict=Body(...)):
 @app.post("/model_selection")
 def select_model(choice:dict=Body(...)):
     select_client(choice["key"],choice["url"],choice["model"])
+
+@app.get("/start")
+def q1():
+    start()
+    
 
 #api_key="gsk_abcdefg",
 #base_url="https://api.groq.com/openai/v1",

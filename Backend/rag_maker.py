@@ -4,7 +4,6 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 from pathlib import Path
-embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/paraphrase-MiniLM-L3-v2")
 
 
 llm_model="openai/gpt-oss-120b"
@@ -65,6 +64,7 @@ def TextSplitter():
     return document_chunks
 
 def vectorizer(document_chunks):
+    embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/paraphrase-MiniLM-L3-v2")
     vector_store = FAISS.from_texts(document_chunks, embeddings)
     return vector_store
 
@@ -77,9 +77,15 @@ def Indexer(vector_store):
     
 
 #DocumentLoader ("documents/nasmv4.html",4)
-chunks=TextSplitter()
-vectors=vectorizer(chunks)
-retriever=Indexer(vectors)
+started=False
+chunks=vectors=retriever=None
+def start():
+    global retriever,started,chunks,vectors
+    if not started:
+        chunks=TextSplitter()
+        vectors=vectorizer(chunks)
+        retriever=Indexer(vectors)
+        started=True
 
 
 def select_client(key,url,model):
