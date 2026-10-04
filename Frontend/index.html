@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAG Pipeline Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Settings Sidebar -->
+        <aside class="sidebar">
+            <h2>⚙️ Pipeline Settings</h2>
+            
+            <div class="input-group">
+                <label for="api-key">API Key (Groq / Custom)</label>
+                <input type="password" id="api-key" placeholder="gsk_...">
+            </div>
+
+            <div class="input-group">
+                <label for="base-url">Base URL</label>
+                <input type="text" id="base-url" value="https://api.groq.com/openai/v1">
+            </div>
+
+            <div class="input-group">
+                <label for="model-select">Model</label>
+                <input list="models" id="model-select" value="openai/gpt-oss-120b">
+                <datalist id="models">
+                    <option value="openai/gpt-oss-120b"></option>
+                    <option value="llama-3.3-70b-versatile"></option>
+                    <option value="llama-3.1-8b-instant"></option>
+                </datalist>
+            </div>
+
+            <button id="save-settings-btn">Apply Settings</button>
+            <p id="settings-status" class="status-msg"></p>
+        </aside>
+
+        <!-- Chat Area -->
+        <main class="chat-container">
+            <header class="chat-header">
+                <h1>Nasm Docs Scraper</h1>
+            </header>
+            
+            <div class="chat-box" id="chat-box">
+                <div class="message system">
+                    Welcome! Configure your API settings on the left, then ask a question about your C++ codebase.
+                </div>
+            </div>
+
+            <div class="input-area">
+                <textarea id="chat-input" placeholder="Ask a question... (e.g., How many registers are in NASM?)" rows="1"></textarea>
+                <button id="send-btn">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
