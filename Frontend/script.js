@@ -1,6 +1,6 @@
 // --- Configuration ---
 const BACKEND_URL = "http://127.0.0.1:8000"; // Assuming default FastAPI local port
-
+//const BACKEND_URL = "http://127.0.0.1:8000/api/nasm-rag-pipeline-llm";
 // --- DOM Elements ---
 const apiKeyInput = document.getElementById('api-key');
 const baseUrlInput = document.getElementById('base-url');
