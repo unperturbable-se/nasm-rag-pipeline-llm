@@ -5,10 +5,12 @@ from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/paraphrase-MiniLM-L3-v2")
 
-client = OpenAI(
-    api_key="redacted",
-    base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
-)
+#client = OpenAI(
+#    api_key="",
+#    base_url="https://api.groq.com/openai/v1",
+#)
+
+llm_model="openai/gpt-oss-120b"
 
 system_prompt = (
 f"""You are a technical documentation formatter.
@@ -42,7 +44,7 @@ markdown_code_splitter = RecursiveCharacterTextSplitter(
         r""            # Ultimate fallback
     ],
     is_separator_regex=True,
-    chunk_size=1000,
+    chunk_size=250,
     chunk_overlap=100
 )
 fileCount=0
@@ -70,7 +72,7 @@ def vectorizer(document_chunks):
 def Indexer(vector_store):
     retriever = vector_store.as_retriever(
          search_type="similarity",
-         search_kwargs={"k": 50}
+         search_kwargs={"k": 20}
         )
     return retriever
     
@@ -81,18 +83,28 @@ vectors=vectorizer(chunks)
 retriever=Indexer(vectors)
 
 
-
-while True:
-    question=str(input("Enter the question:"))
-    reference=retriever.invoke(question+question_improver)
-    response = client.chat.completions.create(
-    model="gemini-3.5-flash",  # Or another supported model like gemini-2.5-pro
-    messages=[
-        {"role": "system", "content": query_prompt},
-        {"role": "user", "content": f"Question:<{question}>   Reference:<{reference}>"}
-    ]
+def select_client(key,url,model):
+    global client
+    client= OpenAI(
+        api_key=key,
+        base_url=url,
     )
-    print(response.choices[0].message.content)
+    global llm_model
+    llm_model=model
+
+def get_rag_response(question: str):
+    reference=retriever.invoke(question+question_improver)
+    try:
+        response = client.chat.completions.create(
+        model=llm_model,  # Or another supported model like gemini-2.5-pro
+        messages=[
+            {"role": "system", "content": query_prompt},
+            {"role": "user", "content": f"Question:<{question}>   Reference:<{reference}>"}
+        ]
+        )
+    except:
+        return "llm communication error"
+    return response.choices[0].message.content
 
 
     
