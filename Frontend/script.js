@@ -1,6 +1,7 @@
 // --- Configuration ---
-const BACKEND_URL = "http://127.0.0.1:8000"; // Assuming default FastAPI local port
+const BACKEND_URL = "https://services.raed.pk/api/nasm-rag-pipeline-llm"; // Assuming default FastAPI local port
 //const BACKEND_URL = "http://127.0.0.1:8000/api/nasm-rag-pipeline-llm";
+
 // --- DOM Elements ---
 const apiKeyInput = document.getElementById('api-key');
 const baseUrlInput = document.getElementById('base-url');
@@ -11,6 +12,29 @@ const settingsStatus = document.getElementById('settings-status');
 const chatBox = document.getElementById('chat-box');
 const chatInput = document.getElementById('chat-input');
 const sendBtn = document.getElementById('send-btn');
+
+// --- Pipeline Initialization ---
+async function initializePipeline() {
+    try {
+        console.log("Initializing RAG pipeline...");
+        const response = await fetch(`${BACKEND_URL}/start`, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' }
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            console.log("Pipeline initialized successfully:", data);
+        } else {
+            console.warn("Pipeline initialization returned non-200 status:", response.status);
+        }
+    } catch (error) {
+        console.error("Failed to hit /start endpoint on boot:", error);
+    }
+}
+
+// Call start request immediately on script load
+initializePipeline();
 
 // --- Functions ---
 
