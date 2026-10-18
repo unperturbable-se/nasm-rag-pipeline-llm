@@ -78,7 +78,9 @@ def Indexer(vector_store):
 
 #DocumentLoader ("documents/nasmv4.html",4)
 started=False
-chunks=vectors=retriever=None
+chunks=[]
+vectors=None
+retriever=None
 def start():
     global retriever,started,chunks,vectors
     if not started:
@@ -89,6 +91,8 @@ def start():
 
 
 def select_client(key,url,model):
+    global started
+    if not started: return
     global client
     client= OpenAI(
         api_key=key,
@@ -98,6 +102,8 @@ def select_client(key,url,model):
     llm_model=model
 
 def get_rag_response(question: str):
+    global started
+    if not started: return "Instance not started yet"
     reference=retriever.invoke(question+question_improver)
     try:
         response = client.chat.completions.create(
@@ -110,6 +116,5 @@ def get_rag_response(question: str):
     except:
         return "llm communication error"
     return response.choices[0].message.content
-
 
     
